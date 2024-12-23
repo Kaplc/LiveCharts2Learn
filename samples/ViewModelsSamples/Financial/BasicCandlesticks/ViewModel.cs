@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.Drawing;
 using LiveChartsCore.SkiaSharpView;
 
 namespace ViewModelsSamples.Financial.BasicCandlesticks;
@@ -10,52 +11,95 @@ namespace ViewModelsSamples.Financial.BasicCandlesticks;
 public class ViewModel
 {
     public Axis[] XAxes { get; set; }
+    public Axis[] YAxes { get; set; }
 
     public ISeries[] Series { get; set; }
+
+    private int count = 2000;
 
     public ViewModel()
     {
         var data = new List<FinancialData>();
-        for (int i = 0; i < 30; i++)
+        var random = new Random();
+
+        // 假设初始的开盘价
+        double initialPrice = 500;
+
+        // 设置波动性和趋势
+        double volatility = 5; // 每天波动的幅度
+        double drift = 0.0005d; // 趋势，比如每天涨0.05%
+
+        // 用于生成随机波动的正态分布
+        double mean = 0;  // 平均变化
+        double stdDev = 1;  // 标准差
+
+        double price = initialPrice;
+
+        for (int i = 0; i < count; i++)
         {
-            var d = new FinancialData { Date = new DateTime(2021, 1, i + 1), High = 520 + i *10, Open = 420 + i * 30, Close = 490 + i * 12, Low = 400 + i * 13 };
+            // 正态分布生成一个随机数，模拟股价的涨跌
+            double randomFactor = mean + stdDev * GetGaussianRandom(random);
+            double dailyChange = volatility * (double)randomFactor;
+
+            // 计算当天的价格
+            price += price * drift + dailyChange;
+
+            var d = new FinancialData
+            {
+                High = price + random.Next(1, 5),  // 高点
+                Low = price - random.Next(1, 5),   // 低点
+                Open = price,                       // 开盘价
+                Close = price + dailyChange        // 收盘价
+            };
+
             data.Add(d);
         }
 
-        //var data = new FinancialData[]
-        //{
-        //    new() { Date = new DateTime(2021, 1, 1), High = 523, Open = 500, Close = 450, Low = 400 },
-        //    new() { Date = new DateTime(2021, 1, 2), High = 500, Open = 450, Close = 425, Low = 400 },
-        //    new() { Date = new DateTime(2021, 1, 3), High = 490, Open = 425, Close = 400, Low = 380 },
-        //    new() { Date = new DateTime(2021, 1, 4), High = 420, Open = 400, Close = 420, Low = 380 },
-        //    new() { Date = new DateTime(2021, 1, 5), High = 520, Open = 420, Close = 490, Low = 400 },
-        //    new() { Date = new DateTime(2021, 1, 6), High = 520, Open = 420, Close = 490, Low = 400 },
-        //    new() { Date = new DateTime(2021, 1, 7), High = 520, Open = 420, Close = 490, Low = 400 },
-        //    new() { Date = new DateTime(2021, 1, 8), High = 520, Open = 420, Close = 490, Low = 400 },
-        //    new() { Date = new DateTime(2021, 1, 9), High = 520, Open = 420, Close = 490, Low = 400 },
-        //    new() { Date = new DateTime(2021, 1, 10), High = 520, Open = 420, Close = 490, Low = 400 },
-        //    new() { Date = new DateTime(2021, 1, 11), High = 520, Open = 420, Close = 490, Low = 400 },
-        //    new() { Date = new DateTime(2021, 1, 12), High = 580, Open = 490, Close = 560, Low = 440 }
-        //};
+        // 创建金融数据点
+        var financialPoints = data.Select(x => new FinancialPointI(x.High, x.Open, x.Close, x.Low)).ToArray();
 
-        Series = [
+        // 初始化图表的 Series
+        Series = new ISeries[]
+        {
             new CandlesticksSeries<FinancialPointI>
             {
-                Values = data.ToArray()
-                    .Select(x => new FinancialPointI(x.High, x.Open, x.Close, x.Low))
-                    .ToArray()
+                Values = financialPoints, // 确保所有点都被传递
+                MaxBarWidth = 200/count, // 调整柱子的宽度，避免遮挡
             }
-        ];
+        };
 
-        XAxes = [
+        // 初始化 X 轴
+        XAxes = new Axis[]
+        {
             new Axis
             {
                 LabelsRotation = 0,
-                Labels = data
-                    .Select(x => x.Date.ToString("yyyy MMM dd"))
-                    .ToArray()
+                MinLimit = 0, // 初始 X 轴最小值
+                MaxLimit = 500, // 初始 X 轴最大值
             }
-        ];
+        };
+
+        // 初始化 Y 轴
+        YAxes = new Axis[]
+        {
+            new Axis
+            {
+                Name = "Price", // 给 Y 轴加个名称
+                MinLimit = 0,  // 初始化最小值
+            MaxLimit = 100, // 初始化最大值
+                TextSize = 12, // 调整文字大小，确保显示
+                MinStep = 1,
+            }
+        };
+    }
+
+    // 生成符合正态分布的随机数（Box-Muller方法）
+    private double GetGaussianRandom(Random random)
+    {
+        double u1 = random.NextDouble();
+        double u2 = random.NextDouble();
+        double z0 = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2);
+        return z0;
     }
 }
 
