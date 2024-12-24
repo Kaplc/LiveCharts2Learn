@@ -1,7 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using LiveChartsCore;
+using LiveChartsCore.Defaults;
+using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.WPF;
 
 namespace WPFSample.Financial.BasicCandlesticks;
@@ -14,7 +19,9 @@ public partial class View : UserControl
     public View()
     {
         InitializeComponent();
-        MyChart.Tooltip = null;
+        //MyChart.Tooltip = null;
+        var y = MyChart.YAxes.FirstOrDefault();
+        y.MaxLimit = 3000;
     }
 
     private Point? _lastMousePosition;

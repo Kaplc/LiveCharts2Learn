@@ -15,7 +15,7 @@ public class ViewModel
 
     public ISeries[] Series { get; set; }
 
-    private int count = 2000;
+    private int count = 3000;
 
     public ViewModel()
     {
@@ -26,8 +26,8 @@ public class ViewModel
         double initialPrice = 500;
 
         // 设置波动性和趋势
-        double volatility = 5; // 每天波动的幅度
-        double drift = 0.0005d; // 趋势，比如每天涨0.05%
+        double volatility = 10; // 每天波动的幅度
+        double drift = 0.0001d; // 趋势，比如每天涨0.05%
 
         // 用于生成随机波动的正态分布
         double mean = 0;  // 平均变化
@@ -64,7 +64,6 @@ public class ViewModel
             new CandlesticksSeries<FinancialPointI>
             {
                 Values = financialPoints, // 确保所有点都被传递
-                MaxBarWidth = 200/count, // 调整柱子的宽度，避免遮挡
             }
         };
 
@@ -76,6 +75,7 @@ public class ViewModel
                 LabelsRotation = 0,
                 MinLimit = 0, // 初始 X 轴最小值
                 MaxLimit = 500, // 初始 X 轴最大值
+                MinStep = 1,
             }
         };
 
@@ -85,8 +85,6 @@ public class ViewModel
             new Axis
             {
                 Name = "Price", // 给 Y 轴加个名称
-                MinLimit = 0,  // 初始化最小值
-            MaxLimit = 100, // 初始化最大值
                 TextSize = 12, // 调整文字大小，确保显示
                 MinStep = 1,
             }

@@ -20,6 +20,6 @@
             Series="{Binding Series}"
             XAxes="{Binding XAxes}"
             YAxes="{Binding YAxes}"
-            ZoomMode="Both" />
+            ZoomMode="PanX" />
     </Grid>
 </UserControl>
