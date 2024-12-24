@@ -3,7 +3,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
-    xmlns:vms="clr-namespace:ViewModelsSamples.Financial.BasicCandlesticks;assembly=ViewModelsSamples">
+    xmlns:vms="clr-namespace:ViewModelsSamples.Financial.BasicCandlesticks;assembly=ViewModelsSamples"
+    Focusable="True">
     <UserControl.DataContext>
         <vms:ViewModel />
     </UserControl.DataContext>
@@ -13,6 +14,7 @@
         </Grid.RowDefinitions>
         <lvc:CartesianChart
             x:Name="MyChart"
+            KeyDown="OnKeyDown"
             MouseDown="Chart_MouseDown"
             MouseMove="Chart_MouseMove"
             MouseUp="Chart_MouseUp"
@@ -20,6 +22,11 @@
             Series="{Binding Series}"
             XAxes="{Binding XAxes}"
             YAxes="{Binding YAxes}"
-            ZoomMode="PanX" />
+            ZoomMode="None" />
+
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Grid.Row="1">
+            <Button Content="+" Width="20" Margin="5" Click="YAxisZoomIn" />
+            <Button Content="-" Width="20" Margin="5" Click="YAxisZoomOut" />
+        </StackPanel>
     </Grid>
 </UserControl>

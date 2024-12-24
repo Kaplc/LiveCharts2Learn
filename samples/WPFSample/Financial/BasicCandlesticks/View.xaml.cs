@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.Kernel.Sketches;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.WPF;
 
@@ -16,18 +17,39 @@ namespace WPFSample.Financial.BasicCandlesticks;
 /// </summary>
 public partial class View : UserControl
 {
+    private ICartesianAxis xAxis;
+    private ICartesianAxis yAxis;
+    private Point? _lastMousePosition;
+
+
     public View()
     {
         InitializeComponent();
         //MyChart.Tooltip = null;
-        var y = MyChart.YAxes.FirstOrDefault();
-        y.MaxLimit = 3000;
+        xAxis = MyChart.XAxes.FirstOrDefault();
+        yAxis = MyChart.YAxes.FirstOrDefault();
+        yAxis.MinLimit = 0;
+        yAxis.MaxLimit = 3000;
+
+        _ = Focus();
     }
 
-    private Point? _lastMousePosition;
+    // 处理 KeyDown 事件
+    private void OnKeyDown(object sender, KeyEventArgs e)
+    {
+        // o缩小
+        if (e.Key == Key.O)
+        {
+            
+        }
+        else if (e.Key == Key.P)
+        {
+        }
+    }
 
     private void Chart_MouseDown(object sender, MouseButtonEventArgs e)
     {
+        Trace.WriteLine(Focus());
         if (e.LeftButton == MouseButtonState.Pressed)
         {
             _lastMousePosition = e.GetPosition((UIElement)sender);
@@ -70,6 +92,9 @@ public partial class View : UserControl
             }
 
             _lastMousePosition = currentMousePosition;
+
+            Trace.WriteLine("ymin:" + yAxis.MinLimit);
+            Trace.WriteLine("ymax:" + yAxis.MaxLimit);
         }
     }
 
@@ -99,8 +124,6 @@ public partial class View : UserControl
 
     private void MyChart_MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        // 获取 X 轴
-        var xAxis = MyChart.XAxes.FirstOrDefault();
         if (xAxis == null) return;
 
         // 当前 X 轴的最小和最大范围
@@ -130,4 +153,46 @@ public partial class View : UserControl
         xAxis.MaxLimit = max;
     }
 
+    private void YAxisZoomIn(object sender, RoutedEventArgs e)
+    {
+
+        if (yAxis == null) return;
+
+        double min = yAxis.MinLimit ?? 0;
+        double max = yAxis.MaxLimit ?? 30; // 默认的最大范围
+
+        // 缩放因子（每次缩放 10%）
+        const double zoomFactor = 0.1;
+        double range = max - min;
+
+        min += range * zoomFactor;
+        max -= range * zoomFactor;
+
+        // 防止范围过小或过大
+        if (max - min < 1) return;
+
+        yAxis.MinLimit = min;
+        yAxis.MaxLimit = max;
+    }
+
+    private void YAxisZoomOut(object sender, RoutedEventArgs e)
+    {
+        if (yAxis == null) return;
+
+        double min = yAxis.MinLimit ?? 0;
+        double max = yAxis.MaxLimit ?? 30; // 默认的最大范围
+
+        // 缩放因子（每次缩放 10%）
+        const double zoomFactor = 0.1;
+        double range = max - min;
+
+        min -= range * zoomFactor;
+        max += range * zoomFactor;
+
+        // 防止范围过小或过大
+        if (max - min < 1) return;
+
+        yAxis.MinLimit = min;
+        yAxis.MaxLimit = max;
+    }
 }
