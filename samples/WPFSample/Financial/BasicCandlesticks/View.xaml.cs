@@ -93,8 +93,8 @@ public partial class View : UserControl
 
             _lastMousePosition = currentMousePosition;
 
-            Trace.WriteLine("ymin:" + yAxis.MinLimit);
-            Trace.WriteLine("ymax:" + yAxis.MaxLimit);
+            //Trace.WriteLine("ymin:" + yAxis.MinLimit);
+            //Trace.WriteLine("ymax:" + yAxis.MaxLimit);
         }
     }
 
@@ -146,11 +146,15 @@ public partial class View : UserControl
         }
 
         // 防止范围过小或过大
-        if (max - min < 1) return;
+        if (max - min < 1 || (int)max - (int)min > 3000) return;
 
         // 更新 X 轴范围
         xAxis.MinLimit = min;
         xAxis.MaxLimit = max;
+
+        Trace.WriteLine($"x:{(int)xAxis.MaxLimit - (int)xAxis.MinLimit}根");
+        Trace.WriteLine(${})
+
     }
 
     private void YAxisZoomIn(object sender, RoutedEventArgs e)
