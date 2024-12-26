@@ -17,6 +17,7 @@ namespace WPFSample.Financial.BasicCandlesticks;
 /// </summary>
 public partial class View : UserControl
 {
+    private CandlesticksSeries<FinancialPointI> series;
     private ICartesianAxis xAxis;
     private ICartesianAxis yAxis;
     private Point? _lastMousePosition;
@@ -28,6 +29,9 @@ public partial class View : UserControl
         //MyChart.Tooltip = null;
         xAxis = MyChart.XAxes.FirstOrDefault();
         yAxis = MyChart.YAxes.FirstOrDefault();
+        series = MyChart.Series.FirstOrDefault() as CandlesticksSeries<FinancialPointI>;
+
+
         yAxis.MinLimit = 0;
         yAxis.MaxLimit = 3000;
 
@@ -145,16 +149,44 @@ public partial class View : UserControl
             max += range * zoomFactor;
         }
 
+        var count = (int)max - (int)min;
+
         // 防止范围过小或过大
-        if (max - min < 1 || (int)max - (int)min > 3000) return;
+        if (count is < 10 or > 3000) return;
 
         // 更新 X 轴范围
         xAxis.MinLimit = min;
         xAxis.MaxLimit = max;
 
-        Trace.WriteLine($"x:{(int)xAxis.MaxLimit - (int)xAxis.MinLimit}根");
-        Trace.WriteLine(${})
 
+        if (count > 200)
+        {
+            series.MaxBarWidth = 0.1;
+        }
+        else if (count is > 80 and <= 150)
+        {
+            series.MaxBarWidth = 2;
+        }
+        else if (count is > 60 and <= 80)
+        {
+            series.MaxBarWidth = 5;
+        }
+        else if (count is > 40 and <= 60)
+        {
+            series.MaxBarWidth = 10;
+        }
+        else if (count is > 20 and <= 40)
+        {
+            series.MaxBarWidth = 20;
+        }
+        else if (count is > 10 and <= 20)
+        {
+            series.MaxBarWidth = 40;
+        }
+
+
+        Trace.WriteLine($"x:{count}根");
+        Trace.WriteLine(series.MaxBarWidth);
     }
 
     private void YAxisZoomIn(object sender, RoutedEventArgs e)
